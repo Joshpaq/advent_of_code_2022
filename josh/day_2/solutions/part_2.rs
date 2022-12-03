@@ -17,27 +17,18 @@ fn read_lines_from_file (filename: String) -> Vec<String> {
         .collect()
 }
 
-fn calculate_game_score (a: &str, b: &str) -> i32 {
-    match b {
-        "X" => match a { // lose
-            "A" => 3,
-            "B" => 1,
-            "C" => 2,
-            _ => 0
-        },
-        "Y" => match a { // draw
-            "A" => 1 + 3,
-            "B" => 2 + 3,
-            "C" => 3 + 3,
-            _ => 0
-        },
-        "Z" => match a { // win
-            "A" => 2 + 6,
-            "B" => 3 + 6,
-            "C" => 1 + 6,
-            _ => 0
-        },
-        _ => 0
+fn calculate_game_score ((a, b): (&str, &str)) -> i32 {
+    match (a, b) {
+      ("X", "A") => 3,
+      ("X", "B") => 1,
+      ("X", "C") => 2,
+      ("Y", "A") => 1 + 3,
+      ("Y", "B") => 1 + 3,
+      ("Y", "C") => 1 + 3,
+      ("Z", "A") => 2 + 6,
+      ("Z", "B") => 3 + 6,
+      ("Z", "C") => 1 + 6,
+      _ => 0
     }
 }
 
@@ -50,7 +41,7 @@ fn main() {
         let mut vec_string: Vec<&str> = line.split_whitespace().collect();
         let b = vec_string.pop().expect("");
         let a = vec_string.pop().expect("");
-        acc + calculate_game_score(a, b)
+        acc + calculate_game_score((a, b))
     });
 
     println!("{}", total_score);
