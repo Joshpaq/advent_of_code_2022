@@ -18,25 +18,19 @@ fn read_lines_from_file (filename: String) -> Vec<String> {
 }
 
 fn calculate_game_score (a: &str, b: &str) -> i32 {
-    match b {
-        "X" => match a { // lose
-            "A" => 3,
-            "B" => 1,
-            "C" => 2,
-            _ => 0
-        },
-        "Y" => match a { // draw
-            "A" => 1 + 3,
-            "B" => 2 + 3,
-            "C" => 3 + 3,
-            _ => 0
-        },
-        "Z" => match a { // win
-            "A" => 2 + 6,
-            "B" => 3 + 6,
-            "C" => 1 + 6,
-            _ => 0
-        },
+    match (a, b) {
+        ("A", "X") => 1 + 3,
+        ("B", "X") => 1 + 0,
+        ("C", "X") => 1 + 6,
+
+        ("A", "Y") => 2 + 6,
+        ("B", "Y") => 2 + 3,
+        ("C", "Y") => 2 + 0,
+
+        ("A", "Z") => 3 + 0,
+        ("B", "Z") => 3 + 6,
+        ("C", "Z") => 3 + 3,
+
         _ => 0
     }
 }
