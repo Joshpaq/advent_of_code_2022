@@ -21,7 +21,6 @@ fn main() {
     let args = Args::parse();
 
     let lines = read_lines_from_file(args.filename);
-    let lines_length = lines.len() as i32;
 
     let mut sum = 0;
 
@@ -36,8 +35,11 @@ fn main() {
         let one_two = one_split.pop().expect("").parse::<i32>().unwrap();
         let one_one = one_split.pop().expect("").parse::<i32>().unwrap();
 
-        if one_one < two_one && one_two < two_one || one_one > two_two && one_two > two_two { sum += 1 }
+        let one_containes_two = one_one <= two_one && one_two >= two_two;
+        let two_containes_one = one_one >= two_one && one_two <= two_two;
+
+        sum = if one_containes_two || two_containes_one { sum + 1 } else { sum }
     }
 
-    println!("{}", lines_length - sum)
+    println!("{}", sum)
 }
