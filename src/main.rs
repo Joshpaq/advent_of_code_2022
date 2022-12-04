@@ -18,68 +18,34 @@ fn read_lines_from_file (filename: String) -> Vec<String> {
         .collect()
 }
 
-enum Left {
-  A,
-  B,
-  C
-}
-
-impl FromStr for Left {
-    type Err = ();
-    fn from_str (input: &str) -> Result<Left, Self::Err> {
-        match input {
-            "A" => Ok(Left::A),
-            "B" => Ok(Left::B),
-            "C" => Ok(Left::C),
-            _ => Err(())
-        }
-    }
-}
-
-
-enum Right {
-  X,
-  Y,
-  Z
-}
-
-impl FromStr for Right {
-    type Err = ();
-    fn from_str (input: &str) -> Result<Right, Self::Err> {
-        match input {
-            "X" => Ok(Right::X),
-            "Y" => Ok(Right::Y),
-            "Z" => Ok(Right::Z),
-            _ => Err(())
-        }
-    }
-}
-
-fn calculate_game_score ((left, right): (Left, Right)) -> i32 {
-    match (left, right) {
-        (Left::A, Right::X) => 3,
-        (Left::B, Right::X) => 1,
-        (Left::C, Right::X) => 2,
-        (Left::A, Right::Y) => 1 + 3,
-        (Left::B, Right::Y) => 2 + 3,
-        (Left::C, Right::Y) => 3 + 3,
-        (Left::A, Right::Z) => 2 + 6,
-        (Left::B, Right::Z) => 3 + 6,
-        (Left::C, Right::Z) => 1 + 6
-    }
-}
-
 fn main() {
     let args = Args::parse();
 
     let lines = read_lines_from_file(args.filename);
-    
-    let total_score = lines.iter().fold(0, |acc, line| {
-        let mut vec_string: Vec<&str> = line.split_whitespace().collect();
-        let right = Right::from_str(vec_string.pop().expect("")).unwrap();
-        let left = Left::from_str(vec_string.pop().expect("")).unwrap();
-        acc + calculate_game_score((left, right))
-    });
 
-    println!("{}", total_score);
+    let mut sum = 0;
+
+    let chars = ['a', 'b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+    let mut seen  = [false; 52];
+
+    let mut index = 0;
+    for line in lines {
+        for char in chars {
+            let has = line.chars().find(|&line_char| line_char == char).is_some();
+
+
+        }
+
+        if (index + 1) % 3 == 0 {
+            // do stuff
+
+
+            // at the end reset seen
+            seen = [false; 52];
+        }
+
+        index += 1;
+    }
+
+    println!("{}", sum)
 }
