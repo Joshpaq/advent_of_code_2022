@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::{prelude::*, BufReader};
 use clap::Parser;
 
-
 #[derive(Parser)]
 struct Args {
     #[clap(short)]
@@ -22,8 +21,6 @@ fn main() {
 
     let lines = read_lines_from_file(args.filename);
 
-    // stacks
-
     let mut stacks: Vec<Vec<char>> = Vec::new();
     let mut moves = false;
     for line in lines {
@@ -35,6 +32,7 @@ fn main() {
 
         if moves {
             // move stacks
+
             let mut amount = 0;
             let mut from = 0;
             let mut to = 0;
@@ -54,8 +52,7 @@ fn main() {
             let mut temp_stack = vec![];
             temp_stack.extend(stacks[from].drain(at..));
 
-            stacks[to].extend(temp_stack.drain(..));
-
+            stacks[to].extend(temp_stack.drain(..).rev());
         } else {
             // build stacks
             for (i, c) in line.chars().enumerate() {
@@ -65,7 +62,7 @@ fn main() {
                     while index + 1 > stacks.len() {
                         stacks.push(Vec::new());
                     }
-                    
+
                     stacks[(i - 1) / 4].push(c);
                 }
             }
