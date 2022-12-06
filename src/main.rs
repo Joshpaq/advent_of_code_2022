@@ -21,6 +21,7 @@ fn main() {
     let args = Args::parse();
 
     let lines = read_lines_from_file(args.filename);
+    let lines_length = lines.len() as i32;
 
     // stacks
 
