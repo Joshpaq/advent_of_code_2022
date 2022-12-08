@@ -1,7 +1,7 @@
-use std::collections::HashSet;
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 use clap::Parser;
+
 
 #[derive(Parser)]
 struct Args {
