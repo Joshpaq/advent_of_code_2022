@@ -28,7 +28,7 @@ fn main() {
     let height = forest.len();
     let width = forest.first().unwrap().len();
 
-    let mut score = 0;
+    let mut max_score = 0;
 
     for y in 1..(height - 1) {
         for x in 1..(width - 1) {
@@ -37,9 +37,10 @@ fn main() {
             let next_column = x + 1;
             let next_row = y + 1;
 
+            let current_score = 1;
             // left
             let mut done_left = false;
-            let left = forest[y][0..x].iter().rev().fold(0, |mut acc, tree| {
+            current_score *= forest[y][0..x].iter().rev().fold(0, |mut acc, tree| {
                 if done_left {
                     return acc
                 } else {
@@ -57,7 +58,7 @@ fn main() {
 
             // right
             let mut done_right = false;
-            let right = forest[y][next_column..].iter().fold(0, |mut acc, tree| {
+            current_score *= forest[y][next_column..].iter().fold(0, |mut acc, tree| {
                 if done_right {
                     return acc
                 } else {
@@ -75,7 +76,7 @@ fn main() {
 
             // top
             let mut done_top = false;
-            let top = forest[0..y].iter().rev().fold(0, |mut acc, row| {
+            current_score *= forest[0..y].iter().rev().fold(0, |mut acc, row| {
                 if done_top {
                     return acc
                 } else {
@@ -93,7 +94,7 @@ fn main() {
 
             // bottom
             let mut done_bottom = false;
-            let bottom = forest[next_row..].iter().fold(0, |mut acc, row| {
+            current_score *= forest[next_row..].iter().fold(0, |mut acc, row| {
                 if done_bottom {
                     return acc
                 } else {
@@ -109,8 +110,8 @@ fn main() {
                 acc
             });
 
-            if top * bottom * right * left > score {
-                score = top * bottom * right * left
+            if current_score > max_score {
+              max_score = current_score
             }
         }
     }
