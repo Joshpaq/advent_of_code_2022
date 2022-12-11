@@ -25,25 +25,21 @@ fn main() {
     let mut x = 1;
     let mut read = true;
     let mut value: i32 = 0;
-    let mut crt = [["."; 40], ["."; 40], ["."; 40], ["."; 40], ["."; 40], ["."; 40]];
+    let mut signal_values = [0, 0, 0, 0, 0, 0];
 
-    for i in 0..240 {
+    for i in 0..220 {
         let cycle = i + 1;
 
+        println!("Cycle {}: {}", cycle, x);
 
-        let vertical = i / 40;
-        let horizontal = i % 40;
-        let horizontal_within_x_bounds = (horizontal as i32 - x).abs() < 2;
-        if horizontal_within_x_bounds {
-            crt[vertical][horizontal] = "#";
+        if cycle >= 20 && ((cycle - 20) % 40) == 0 {
+            signal_values[(cycle - 20) / 40] = x * cycle as i32;
+            println!("{:?}", signal_values);
         }
-
+        
         if read {
-            let instruction = match lines.pop_front() {
-                Some(v) => v,
-                None => break
-            };
-
+            let instruction = lines.pop_front().unwrap();
+            println!("Instruction: {}", instruction);
             if instruction != "noop" {
                 let split_instruction = instruction.split_whitespace().collect::<Vec<&str>>();
                 value = split_instruction[1].parse().unwrap();
@@ -54,12 +50,9 @@ fn main() {
             value = 0;
             read = true;
         }
+        
+
     }
 
-    println!("{:?}", crt[0].join(""));
-    println!("{:?}", crt[1].join(""));
-    println!("{:?}", crt[2].join(""));
-    println!("{:?}", crt[3].join(""));
-    println!("{:?}", crt[4].join(""));
-    println!("{:?}", crt[5].join(""));
+    println!("{}", signal_values.iter().sum::<i32>())
 }
