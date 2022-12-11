@@ -20,8 +20,7 @@ let totalStrength = 0;
 for (let cy = 0; cy < loop.length; cy++) {
   const cycle = cy + 1;
   if (targets.includes(cycle)) {
-    const sigStr = cycle * x;
-    totalStrength += sigStr;
+    totalStrength += cycle * x;
   }
 
   if (typeof loop[cy] === 'number') x += loop[cy];

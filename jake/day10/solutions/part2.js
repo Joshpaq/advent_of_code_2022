@@ -23,10 +23,7 @@ const targets = [20, 60, 100, 140, 180, 220];
 let totalStrength = 0;
 for (let cy = 0; cy < loop.length; cy++) {
   const cycle = cy + 1;
-  if (targets.includes(cycle)) {
-    const sigStr = cycle * x;
-    totalStrength += sigStr;
-  }
+  if (targets.includes(cycle)) totalStrength += cycle * x;
 
   if (
     cy % NUM_COLS === x - 1 ||
@@ -42,7 +39,7 @@ for (let cy = 0; cy < loop.length; cy++) {
 console.log('Signal Strength ->', totalStrength);
 
 console.log(
-  Array.from({ length: NUM_ROWS }, (v, i) => {
+  Array.from({ length: NUM_ROWS }, (_, i) => {
     return CRT.slice(i * NUM_COLS, i * NUM_COLS + NUM_COLS).join('');
   }).join('\n')
 );
