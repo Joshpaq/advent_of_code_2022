@@ -2,6 +2,7 @@ use std::fs::{File};
 use std::io::{prelude::*, BufReader};
 use clap::Parser;
 use regex::Regex;
+use num_bigint::{BigInt, ToBigInt};
 
 #[derive(Parser)]
 struct Args {
@@ -19,21 +20,21 @@ fn read_lines_from_file (filename: String) -> Vec<String> {
 
 #[derive(Debug)]
 struct Monkey {
-    items: Vec<usize>,
-    test: usize,
-    true_monkey: usize,
-    false_monkey: usize,
+    items: Vec<BigInt>,
+    test: u128,
+    true_monkey: u128,
+    false_monkey: u128,
     operation: String,
-    inspections: usize
+    inspections: u128
 }
 
-fn calculate_operation (operation: &str, old: usize) -> usize {
+fn calculate_operation (operation: &str, old: BigInt) -> BigInt {
     let split: Vec<&str> = operation.split_whitespace().collect();
     let left = &split.get(0).unwrap()[..];
     let op = &split.get(1).unwrap()[..];
     let right = &split.get(2).unwrap()[..];
-    let left_value: usize = if left == "old" { old } else { left.parse().unwrap() };
-    let right_value: usize = if right == "old" { old } else { right.parse().unwrap() };
+    let left_value: BigInt = if left == "old" { old.clone() } else { left.parse().unwrap() };
+    let right_value: BigInt = if right == "old" { old.clone() } else { right.parse().unwrap() };
 
     match op {
         "+" => left_value + right_value,
@@ -42,9 +43,9 @@ fn calculate_operation (operation: &str, old: usize) -> usize {
     }
 }
 
-fn get_starting_items (line: &str) -> Vec<usize> {
+fn get_starting_items (line: &str) -> Vec<BigInt> {
     let split_line: Vec<&str> = line.split(":").collect();
-    split_line.get(1).unwrap().split(",").map(|v: &str| v.trim().parse::<usize>().unwrap()).collect::<Vec<usize>>()
+    split_line.get(1).unwrap().split(",").map(|v: &str| v.trim().parse::<BigInt>().unwrap()).collect::<Vec<BigInt>>()
 }
 
 fn get_operation_str (line: &str) -> &str {
@@ -65,10 +66,10 @@ fn main() {
     let false_regex = Regex::new(r"If false: throw to monkey (\d+)").unwrap();
     let operation_regex = Regex::new(r"Operation:").unwrap();
 
-    let mut starting_items: Vec<usize> = Vec::new();
-    let mut test: usize = 0;
-    let mut true_monkey: usize = 0;
-    let mut false_monkey: usize = 0;
+    let mut starting_items: Vec<BigInt> = Vec::new();
+    let mut test: u128 = 0;
+    let mut true_monkey: u128 = 0;
+    let mut false_monkey: u128 = 0;
     let mut operation: &str = "";
     for line in lines.iter() {
         if starting_items_regex.is_match(line) {
@@ -93,21 +94,21 @@ fn main() {
         }
     }
 
-    let mut items: Vec<Vec<usize>> = vec![vec![]; monkeys.len()];
-    let modulo: usize = monkeys.iter().map(|m| m.test).product();
+    let mut items: Vec<Vec<BigInt>> = vec![vec![]; monkeys.len()];
+    //let modulo: u128 = monkeys.iter().map(|m| m.test).product();
     (0..10000).for_each(|_| {
         monkeys.iter_mut().enumerate().for_each(|(i, monkey)| {
             monkey.items.append(&mut items[i]);
             monkey.items.drain(..).for_each(|item| {
-                let result = calculate_operation(&monkey.operation, item) % modulo;
-                let monkey_index = if result % monkey.test == 0 { monkey.true_monkey } else { monkey.false_monkey };
+                let result = calculate_operation(&monkey.operation, item).clone();// % modulo; // / 3;
+                let monkey_index = if result.clone() % monkey.test == 0.to_bigint().unwrap() { monkey.true_monkey } else { monkey.false_monkey };
                 items[monkey_index as usize].push(result);
                 monkey.inspections += 1;
             })
         })
     });
 
-    let mut monkey_inspections = monkeys.iter().map(|monkey| monkey.inspections).collect::<Vec<usize>>();
+    let mut monkey_inspections = monkeys.iter().map(|monkey| monkey.inspections).collect::<Vec<u128>>();
     monkey_inspections.sort();
     monkey_inspections.reverse();
     println!("{}", monkey_inspections.get(0).unwrap() * monkey_inspections.get(1).unwrap());

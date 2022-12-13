@@ -94,12 +94,11 @@ fn main() {
     }
 
     let mut items: Vec<Vec<usize>> = vec![vec![]; monkeys.len()];
-    let modulo: usize = monkeys.iter().map(|m| m.test).product();
-    (0..10000).for_each(|_| {
+    (0..20).for_each(|_| {
         monkeys.iter_mut().enumerate().for_each(|(i, monkey)| {
             monkey.items.append(&mut items[i]);
             monkey.items.drain(..).for_each(|item| {
-                let result = calculate_operation(&monkey.operation, item) % modulo;
+                let result = calculate_operation(&monkey.operation, item) / 3;
                 let monkey_index = if result % monkey.test == 0 { monkey.true_monkey } else { monkey.false_monkey };
                 items[monkey_index as usize].push(result);
                 monkey.inspections += 1;
