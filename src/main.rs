@@ -1,7 +1,6 @@
 use std::fs::{File};
 use std::io::{prelude::*, BufReader};
 use clap::Parser;
-use regex::Regex;
 
 #[derive(Parser)]
 struct Args {
@@ -17,39 +16,141 @@ fn read_lines_from_file (filename: String) -> Vec<String> {
         .collect()
 }
 
-#[derive(Debug)]
-struct Monkey {
-    items: Vec<usize>,
-    test: usize,
-    true_monkey: usize,
-    false_monkey: usize,
-    operation: String,
-    inspections: usize
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct Point {
+    x: usize,
+    y: usize,
+    elevation: usize
 }
 
-fn calculate_operation (operation: &str, old: usize) -> usize {
-    let split: Vec<&str> = operation.split_whitespace().collect();
-    let left = &split.get(0).unwrap()[..];
-    let op = &split.get(1).unwrap()[..];
-    let right = &split.get(2).unwrap()[..];
-    let left_value: usize = if left == "old" { old } else { left.parse().unwrap() };
-    let right_value: usize = if right == "old" { old } else { right.parse().unwrap() };
+impl Point {
+    fn get_possible_next(&self, map: &[Vec<Point>]) -> Vec<Point> {
+        let mut possible_next: Vec<Point> = vec![];
+        let height = map.len();
+        let width = map[self.y].len();
+        
+        if self.y > 0 && self.elevation + 1 >= map[self.y - 1][self.x].elevation {
+            possible_next.push(Point { x: self.x, y: self.y - 1, elevation: map[self.y - 1][self.x].elevation });
+        }
 
-    match op {
-        "+" => left_value + right_value,
-        "*" => left_value * right_value,
-        _ => panic!("UNKNWON OP")
+        if self.y < height - 1 && self.elevation + 1 >= map[self.y + 1][self.x].elevation {
+            possible_next.push(Point { x: self.x, y: self.y + 1, elevation: map[self.y + 1][self.x].elevation });
+        }
+
+        if self.x > 0 && self.elevation + 1 >= map[self.y][self.x - 1].elevation {
+            possible_next.push(Point { x: self.x - 1, y: self.y, elevation: map[self.y][self.x - 1].elevation });
+        }
+
+        if self.x < width - 1 && self.elevation + 1 >= map[self.y][self.x + 1].elevation {
+            possible_next.push(Point { x: self.x + 1, y: self.y, elevation: map[self.y][self.x + 1].elevation });
+        }
+
+        possible_next
+    }
+
+    fn distance (&self, other: &Point) -> usize {
+        return other.x.abs_diff(self.x) + other.y.abs_diff(self.y)
     }
 }
 
-fn get_starting_items (line: &str) -> Vec<usize> {
-    let split_line: Vec<&str> = line.split(":").collect();
-    split_line.get(1).unwrap().split(",").map(|v: &str| v.trim().parse::<usize>().unwrap()).collect::<Vec<usize>>()
+fn char_to_height (c: char) -> usize {
+    match c {
+        'a' | 'A' => 1, 
+        'b' | 'B' => 2, 
+        'c' | 'C' => 3, 
+        'd' | 'D' => 4, 
+        'e' | 'E' => 5, 
+        'f' | 'F' => 6, 
+        'g' | 'G' => 7, 
+        'h' | 'H' => 8, 
+        'i' | 'I' => 9, 
+        'j' | 'J' => 10, 
+        'k' | 'K' => 11, 
+        'l' | 'L' => 12, 
+        'm' | 'M' => 13, 
+        'n' | 'N' => 14, 
+        'o' | 'O' => 15, 
+        'p' | 'P' => 16, 
+        'q' | 'Q' => 17, 
+        'r' | 'R' => 18, 
+        's' | 'S' => 19, 
+        't' | 'T' => 20, 
+        'u' | 'U' => 21, 
+        'v' | 'V' => 22,
+        'w' | 'W' => 23,
+        'x' | 'X' => 24,
+        'y' | 'Y' => 25,
+        'z' | 'Z' => 26,
+        _ => panic!("UNHANDLED CHAR")
+    }
 }
 
-fn get_operation_str (line: &str) -> &str {
-    let split_line: Vec<&str> = line.split("=").collect();
-    split_line.get(1).unwrap().trim()
+fn calculate (start: (usize, usize), end: (usize, usize), map: &Vec<Vec<Point>>) -> usize {
+    let height = map.len();
+    let width = map.get(0).unwrap().len();
+
+    let mut points: Vec<Point> = vec![];
+    map.iter().for_each(|row| {
+        row.iter().for_each(|p| {
+            points.push(p.clone())
+        })
+    });
+
+    println!("{:?}", end);
+    
+    println!("{:?}", points);
+
+    let mut shortest = usize::MAX;
+
+    let start = map.get(start.0).unwrap().get(start.1).unwrap();
+    let stop = Point { x: end.0, y: end.1, elevation: 0 };
+    let mut path: Vec<Point> = vec![start.clone()];
+    let mut possible_next = start.get_possible_next(map);
+    let mut dead: Vec<Point> = vec![];
+
+    println!("POSSIBLE NEXT FROMT START: {:?}", possible_next);
+    let mut current_distance = start.distance(&stop);
+
+    while let Some(p) = possible_next.pop() {
+        println!("Current Point: {:?}", p);
+
+        if p.distance(&stop) > current_distance {
+            continue;
+        }
+
+        // using current distance isn't right, I need a way to unwind the possible next and choose a different branch.. i'm close
+        current_distance = p.distance(&stop);
+
+        if let Some(_) = dead.iter().find(|d| d.x == p.x && d.y == p.y) {
+            println!("Dead: {:?}", p);
+            continue;
+        }
+
+        if let Some(_) = path.iter().find(|d| d.x == p.x && d.y == p.y) {
+            println!("Been Here: {:?}", p);
+            continue;
+        }
+
+        path.push(p.clone());
+        if p.x == end.0 && p.y == end.1 && shortest > path.len() {
+            println!("FOUND IT?!!: {:?}", path);
+            shortest = path.len();
+            break;
+        }
+        
+        println!("Path: {:?}", path);
+
+        possible_next = p.get_possible_next(map);
+
+        println!("{:?}", possible_next);
+
+        if possible_next.len() == 0 {
+            dead.push(path.pop().unwrap());
+            possible_next = path.last().unwrap().get_possible_next(map);
+        }
+    }
+    
+    shortest
 }
 
 fn main() {
@@ -57,58 +158,24 @@ fn main() {
 
     let lines = read_lines_from_file(args.filename);
 
-    let mut monkeys: Vec<Monkey>= Vec::new();
+    let mut start: (usize, usize) = (0, 0);
+    let mut end: (usize, usize) = (0, 0);
 
-    let starting_items_regex = Regex::new(r"Starting items:").unwrap();
-    let test_regex = Regex::new(r"Test: divisible by (\d+)").unwrap();
-    let true_regex = Regex::new(r"If true: throw to monkey (\d+)").unwrap();
-    let false_regex = Regex::new(r"If false: throw to monkey (\d+)").unwrap();
-    let operation_regex = Regex::new(r"Operation:").unwrap();
+    let map: Vec<Vec<Point>> = lines.iter().enumerate().map(|(y, row)| {
+        row.chars().enumerate().map(|(x, c)| {
+            if c == 'S' {
+                start.0 = x;
+                start.1 = y;
+            }
 
-    let mut starting_items: Vec<usize> = Vec::new();
-    let mut test: usize = 0;
-    let mut true_monkey: usize = 0;
-    let mut false_monkey: usize = 0;
-    let mut operation: &str = "";
-    for line in lines.iter() {
-        if starting_items_regex.is_match(line) {
-            starting_items = get_starting_items(line).clone();
-        }
+            if c == 'E' {
+                end.0 = x;
+                end.1 = y;
+            }
 
-        if operation_regex.is_match(line) {
-            operation = get_operation_str(line);
-        }
+            Point { x, y, elevation: char_to_height(c) }
+        }).collect()
+    }).collect();
 
-        if let Some(test_line) = test_regex.captures(line) {
-            test = test_line.get(1).unwrap().as_str().parse().unwrap();
-        }
-
-        if let Some(true_line) = true_regex.captures(line) {
-            true_monkey = true_line.get(1).unwrap().as_str().parse().unwrap();
-        }
-
-        if let Some(false_line) = false_regex.captures(line) {
-            false_monkey = false_line.get(1).unwrap().as_str().parse().unwrap();
-            monkeys.push(Monkey { items: starting_items.clone(), test, true_monkey, false_monkey, operation: operation.to_string(), inspections: 0 })
-        }
-    }
-
-    let mut items: Vec<Vec<usize>> = vec![vec![]; monkeys.len()];
-    let modulo: usize = monkeys.iter().map(|m| m.test).product();
-    (0..10000).for_each(|_| {
-        monkeys.iter_mut().enumerate().for_each(|(i, monkey)| {
-            monkey.items.append(&mut items[i]);
-            monkey.items.drain(..).for_each(|item| {
-                let result = calculate_operation(&monkey.operation, item) % modulo;
-                let monkey_index = if result % monkey.test == 0 { monkey.true_monkey } else { monkey.false_monkey };
-                items[monkey_index as usize].push(result);
-                monkey.inspections += 1;
-            })
-        })
-    });
-
-    let mut monkey_inspections = monkeys.iter().map(|monkey| monkey.inspections).collect::<Vec<usize>>();
-    monkey_inspections.sort();
-    monkey_inspections.reverse();
-    println!("{}", monkey_inspections.get(0).unwrap() * monkey_inspections.get(1).unwrap());
+    println!("{:?}", calculate(start, end, &map));
 }
