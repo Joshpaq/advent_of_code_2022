@@ -2,6 +2,7 @@
   "name": "day14sand",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "src/main.js",
   "scripts": {
     "build": "webpack",
